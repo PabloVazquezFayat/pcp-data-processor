@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'"> -->
+    <!-- <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'"> -->
+    <link rel="stylesheet" href="styles/app.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.0/jszip.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.0/xlsx.js"></script>
+    <script src="app.js"></script>
+    <title>PCP DATA PROCESSOR</title>
+  </head>
+  <body>
+    <div id="APP">
+        <label>Add Excel worksheet (.xlsx)</label>
+        <input type="file" name="file" id="excel-file-input">
+        <button id="excel-file-process">Process</button>
+
+        <div class="loader">
+            <img src="imgs/Loading_2.gif" alt="Processing...">
+        </div>
+
+        <div>
+          <p id="json-code-block">
+
+          </p>
+        </div>
+    </div>
+    <script src="./renderer.js"></script>
+  </body>
+</html>
