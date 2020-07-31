@@ -13,18 +13,18 @@
   </head>
   <body>
     <div id="APP">
-        <label>Add Excel worksheet (.xlsx)</label>
-        <input type="file" name="file" id="excel-file-input">
-        <button id="excel-file-process">Process</button>
+        <h1>PCP DATA PROCESSOR</h1>
 
         <div class="loader">
-            <img src="imgs/Loading_2.gif" alt="Processing...">
+          <label id="loader-label">
+            <p>Drag &amp; Drop or click to select Excel worksheet (.xlsx)</p>
+            <input type="file" name="file" id="excel-file-input"> 
+          </label>
+          <img id="loader-icon" src="imgs/Loading_2.gif" alt="Processing...">
         </div>
 
         <div>
-          <p id="json-code-block">
-
-          </p>
+          <textarea id="json-code-block" wrap="hard"></textarea>
         </div>
     </div>
     <script src="./renderer.js"></script>
