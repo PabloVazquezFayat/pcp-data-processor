@@ -1,107 +1,107 @@
-// STAMPS
-// [Array with Stamp dates];
-// Object with {“PRODUCT_ID”: {“dates_index”: {“ship_code”: “stamp_value”}}};
-// // BADGES
-// [Array with Marketing Message Dates]
-// Object with {“PRODUCT_ID”: {“dates_index”: {“ship_code”: “badges_value”}}};
+function parseExcel(e, cb){
 
-window.addEventListener('DOMContentLoaded', ()=>{
+    let file = e.target.files[0];
+    let formatedData = {};
 
-    let loaderLabel = document.querySelector('#loader-label');
-    let loaderIcon = document.querySelector('#loader-icon');
+    let reader = new FileReader();
 
-    const parseExcel = function(e){
+    reader.onload = (e)=> {
+        let data = e.target.result;
+        let workbook = XLSX.read(data, {type: 'binary'});
 
-        let file = e.target.files[0];
-        let formatedData = {};
-
-        if(!file){
-            loaderLabel.style.display = 'block';
-            loaderIcon.style.display = 'none';
-            return;
+        for(let i = 0; i < workbook.SheetNames.length; i++){
+            let rowDataObject = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[workbook.SheetNames[i]]);
+            formatedData[workbook.SheetNames[i]] = rowDataObject;
         }
 
-        let reader = new FileReader();
-    
-        reader.onload = (e)=> {
-
-            let data = e.target.result;
-            let workbook = XLSX.read(data, {type: 'binary'});
-
-            for(let i = 0; i < workbook.SheetNames.length; i++){
-                let rowDataObject = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[workbook.SheetNames[i]]);
-
-                let valueData = rowDataObject.map((data)=>{
-                    return `${data['Ship Code']} ${data['Sailing Date']} ${data['PRODUCT_ID']} ${data['Marketing Message ']} ${data['Stamp']}`
-                });
-
-                let indices = [];
-
-                valueData.some((value, i)=>{
-                    if(valueData.indexOf(value) !== -1){
-                        indices.push(i);
-                    }
-                })
-
-                indices.forEach((indx, i)=>{
-                    console.log(`index: ${i}`, rowDataObject[indx]);
-                })
-
-                // console.log(isDuplicate);
-
-                let mappedData = rowDataObject.map((obj)=>{
-
-                    let dataObject = {};
-
-                    if(Object.keys(obj).indexOf('Ship Code') !== -1){
-                        dataObject['Ship Code'] = obj['Ship Code']
-                    }
-                    
-                    if(Object.keys(obj).indexOf('Sailing Date') !== -1){
-                        dataObject['Sailing Date'] = obj['Sailing Date']
-                    }
-                    
-                    if(Object.keys(obj).indexOf('PRODUCT_ID') !== -1){
-                        dataObject['PRODUCT_ID'] = obj["PRODUCT_ID"]
-                    }
-                    
-                    if( Object.keys(obj).indexOf('Marketing Message') !== -1   || 
-                        Object.keys(obj).indexOf('Marketing Message ') !== -1  ||
-                        Object.keys(obj).indexOf(' Marketing Message ') !== -1 ||
-                        Object.keys(obj).indexOf(' Marketing Message') !== -1
-                    ){
-                        dataObject['Marketing Message'] = obj['Marketing Message']
-                    }
-                    
-                    if(Object.keys(obj).indexOf('Stamp') !== -1){
-                        dataObject['Stamp'] = obj['Stamp']
-                    }
-
-                    return dataObject;
-                });
-
-                formatedData[workbook.SheetNames[i]] = mappedData;
-            }
-
-            // console.log(formatedData);
-
-            document.querySelector('#json-code-block').innerText = '';
-            // document.querySelector('#json-code-block').innerText = JSON.stringify(formatedData);
-
-            loaderLabel.style.display = 'block';
-            loaderIcon.style.display = 'none';
-
-        };
-
-        reader.readAsBinaryString(file);
-
+        cb(formatedData);
     };
 
-    let input = document.querySelector('#excel-file-input');
+    reader.readAsBinaryString(file);
 
-    input.addEventListener('change', (e)=>{
-        loaderLabel.style.display = 'none';
-        loaderIcon.style.display = 'block';
-        parseExcel(e)
+};
+
+function showLoadingIcon(){
+    document.querySelector('#loader-label').style.display = 'none';
+    document.querySelector('#loader-icon').style.display = 'block';
+}
+
+function hideLoadingIcon(){
+    document.querySelector('#loader-label').style.display = 'block';
+    document.querySelector('#loader-icon').style.display = 'none';
+}
+
+function clearCodeContainer(){
+    document.querySelector('#json-code-block').innerText = ''
+}
+
+function fillCodeContainer(data){
+    document.querySelector('#json-code-block').innerText = JSON.stringify(data);
+}
+
+function consolidateSheetData(data){
+
+    let consolidatedData = []
+
+    for (const key in data) {
+        data[key].forEach((record)=>{
+            consolidatedData.push(record);
+        })
+    }
+
+    return consolidatedData;
+}
+
+function remapData(data){
+    return data.map((record, i)=>{
+        return {
+            marketingMessage: record[Object.keys(record)[5]],
+            productID: record[Object.keys(record)[6]],
+            sailingDate: record[Object.keys(record)[2]],
+            shipCode: record[Object.keys(record)[1]],
+            stamp: Object.keys(record).indexOf('Stamp') !== -1 ? record[Object.keys(record)[8]] : undefined,
+        }
+    })
+}
+
+function deleteDuplicateData(data){
+    let testArray = []
+    let filtered = [];
+
+    for(let i = 0; i < data.length; i++){
+        if(testArray.indexOf(`${data[i].productID}${data[i].sailingDate}${data[i].shipCode}`) === -1){
+            filtered.push(data[i]);
+        }
+        testArray.push(`${data[i].productID}${data[i].sailingDate}${data[i].shipCode}`);
+    }
+    return filtered;
+}
+
+function main(e){
+
+    showLoadingIcon();
+
+    parseExcel(e, (data)=>{
+
+        
+        let consolidatedData = consolidateSheetData(data);
+        let remappedData = remapData(consolidatedData);
+        let reducedData = deleteDuplicateData(remappedData);
+
+        console.log(remappedData);
+        console.log(reducedData);
+
+        clearCodeContainer();
+        // fillCodeContainer(reducedData);
+
+        hideLoadingIcon();
+
+    });
+
+}
+
+window.addEventListener('DOMContentLoaded', ()=>{
+    document.querySelector('#excel-file-input').addEventListener('change', (e)=>{
+        main(e)
     }, false);
-})
+});
