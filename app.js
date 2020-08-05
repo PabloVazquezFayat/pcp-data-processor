@@ -85,6 +85,17 @@ function deleteDuplicateData(data){
     return filtered;
 }
 
+async function sendDataToAPI(data){
+    try{
+
+        let sentData = await axios.post('http://localhost:4000/products/create', {products: data});
+        console.log(sentData.data.message);
+
+    }catch(error){ 
+        console.log(error);
+    }
+}
+
 function main(e){
 
     showLoadingIcon();
@@ -95,8 +106,12 @@ function main(e){
         let remappedData = remapData(consolidatedData);
         let reducedData = deleteDuplicateData(remappedData);
 
-        clearCodeContainer();
-        fillCodeContainer(reducedData);
+        console.log(reducedData);
+
+        // clearCodeContainer();
+        // fillCodeContainer(reducedData);
+
+        sendDataToAPI(reducedData);
 
         hideLoadingIcon();
 
