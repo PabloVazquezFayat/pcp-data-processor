@@ -95,8 +95,8 @@ function main(e){
         let remappedData = remapData(consolidatedData);
         let reducedData = deleteDuplicateData(remappedData);
 
-        // clearCodeContainer();
-        // fillCodeContainer(reducedData);
+        clearCodeContainer();
+        fillCodeContainer(reducedData);
 
         hideLoadingIcon();
 
