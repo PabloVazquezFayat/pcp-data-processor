@@ -1,7 +1,13 @@
+var start = Date.now();
+
 function parseExcel(e, cb){
 
     let file = e.target.files[0];
     let formatedData = {};
+
+    if(!file){
+        return;
+    }
 
     let reader = new FileReader();
 
@@ -65,15 +71,17 @@ function remapData(data){
 }
 
 function deleteDuplicateData(data){
-    let testArray = []
+    let refObject = {};
     let filtered = [];
 
-    for(let i = 0; i < data.length; i++){
-        if(testArray.indexOf(`${data[i].productID}${data[i].sailingDate}${data[i].shipCode}`) === -1){
-            filtered.push(data[i]);
-        }
-        testArray.push(`${data[i].productID}${data[i].sailingDate}${data[i].shipCode}`);
+    data.forEach((d, i)=>{
+        refObject[`${d.marketingMessage}${d.productID}${d.sailingDate}${d.shipCode}${d.stamp}`] = i;
+    });
+
+    for (const key in refObject) {
+        filtered.push(data[refObject[key]]);
     }
+    
     return filtered;
 }
 
@@ -83,15 +91,11 @@ function main(e){
 
     parseExcel(e, (data)=>{
 
-        
         let consolidatedData = consolidateSheetData(data);
         let remappedData = remapData(consolidatedData);
         let reducedData = deleteDuplicateData(remappedData);
 
-        console.log(remappedData);
-        console.log(reducedData);
-
-        clearCodeContainer();
+        // clearCodeContainer();
         // fillCodeContainer(reducedData);
 
         hideLoadingIcon();
